@@ -16,8 +16,8 @@ export async function POST(request: Request) {
         }
 
         const configuredVerifier = new SelfBackendVerifier(
-            'https://forno.celo.org',
             "self-workshop",
+            "https://eb0e-38-130-151-83.ngrok-free.app",
             'uuid',
             false
         )
