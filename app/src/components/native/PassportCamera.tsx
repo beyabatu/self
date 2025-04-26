@@ -83,7 +83,7 @@ export const PassportCamera: React.FC<PassportCameraProps> = ({
         onPassportRead(null, extractMRZInfo(event.nativeEvent.data));
       } else {
         onPassportRead(null, {
-          passportNumber: event.nativeEvent.data.documentNumber,
+          passportNumber: event.nativeEvent.data.documentNumber.replace(/O/g, "0"),
           dateOfBirth: event.nativeEvent.data.birthDate,
           dateOfExpiry: event.nativeEvent.data.expiryDate,
         });
