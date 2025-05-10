@@ -51,34 +51,6 @@ interface IIdentityVerificationHubV2 {
     }
 
     /**
-     * @notice Structure representing human-readable revealed data after unpacking.
-     * @param issuingState The issuing state as a string.
-     * @param name Array of strings representing the passport holder's name.
-     * @param passportNumber The passport number.
-     * @param nationality The nationality.
-     * @param dateOfBirth Formatted date of birth.
-     * @param gender The gender.
-     * @param expiryDate Formatted expiration date.
-     * @param olderThan The verified "older than" age.
-     * @param passportNoOfac The passport number OFAC verification result.
-     * @param nameAndDobOfac The name and date of birth OFAC verification result.
-     * @param nameAndYobOfac The name and year of birth OFAC verification result.
-     */
-    struct ReadableRevealedData {
-        string issuingState;
-        string[] name;
-        string passportNumber;
-        string nationality;
-        string dateOfBirth;
-        string gender;
-        string expiryDate;
-        uint256 olderThan;
-        uint256 passportNoOfac;
-        uint256 nameAndDobOfac;
-        uint256 nameAndYobOfac;
-    }
-
-    /**
      * @notice Structure representing a hub proof for VC and Disclose verification.
      * @param olderThanEnabled Flag indicating if the 'olderThan' check is required.
      * @param olderThan Threshold age for verification.
@@ -108,34 +80,6 @@ interface IIdentityVerificationHubV2 {
         external
         view
         returns (VcAndDiscloseVerificationResult memory result);
-
-    /**
-     * @notice Converts packed revealed data into a human-readable format.
-     * @dev Uses an array of RevealedDataType to determine which attributes to extract from the packed data.
-     * @param revealedDataPacked An array of three uint256 containing the packed data.
-     * @param types An array of RevealedDataType indicating the order of attributes.
-     * @return readableData The decoded and formatted revealed data.
-     */
-    function getReadableRevealedData(
-        uint256[3] memory revealedDataPacked,
-        RevealedDataType[] memory types
-    )
-        external
-        view
-        returns (ReadableRevealedData memory readableData);
-
-    /**
-     * @notice Retrieves a human-readable list of forbidden countries.
-     * @dev Converts the packed forbidden countries list into a fixed-size array of strings.
-     * @param forbiddenCountriesListPacked The packed representation of forbidden countries.
-     * @return forbiddenCountries A fixed-size array (length defined by CircuitConstants.MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH) of strings representing forbidden countries.
-     */
-    function getReadableForbiddenCountries(
-        uint256[4] memory forbiddenCountriesListPacked
-    )
-        external
-        view
-        returns (string[40] memory forbiddenCountries);
 
     /**
      * @notice Registers a passport commitment using a register circuit proof.

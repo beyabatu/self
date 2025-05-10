@@ -13,6 +13,7 @@ import {IRegisterCircuitVerifier} from "./interfaces/IRegisterCircuitVerifier.so
 import {IVcAndDiscloseCircuitVerifier} from "./interfaces/IVcAndDiscloseCircuitVerifier.sol";
 import {IDscCircuitVerifier} from "./interfaces/IDscCircuitVerifier.sol";
 import {ImplRoot} from "./upgradeable/ImplRoot.sol";
+import {IdentityVerificationHubStorageV1, IdentityVerificationHubImplV1} from "IdentityVerificationHubImplV1.sol"; 
 import {IIdentityRegistryIdCardV1} from "./interfaces/IIdentityRegistryIdCardV1.sol";
 
 /**
@@ -46,37 +47,11 @@ import {IIdentityRegistryIdCardV1} from "./interfaces/IIdentityRegistryIdCardV1.
  * @notice Storage contract for IdentityVerificationHubImplV2.
  * @dev Inherits from ImplRoot to include upgradeability functionality.
  */
-abstract contract IdentityVerificationHubStorageV2 is 
-    ImplRoot 
+abstract contract IdentityVerificationHubStorageV2 is
+    IdentityVerificationHubStorageV1
 {
-    // ====================================================
-    // Storage Variables
-    // ====================================================
-    
-    /// @notice Address of the Identity Registry.
-    address internal _registry;
-
-    /// @notice Address of the VC and Disclose circuit verifier.
-    address internal _vcAndDiscloseCircuitVerifier;
-
-    /// @notice Mapping from signature type to register circuit verifier addresses.
-    mapping(uint256 => address) internal _sigTypeToRegisterCircuitVerifiers;
-
-    /// @notice Mapping from signature type to DSC circuit verifier addresses..
-    mapping(uint256 => address) internal _sigTypeToDscCircuitVerifiers;
-
-    /// @notice Address of the Identity Registry for Id Cards.
-    address internal _registryIdCard;
-
-    /// @notice Address of the VC and Disclose circuit verifier for Id Cards.
-    address internal _vcAndDiscloseCircuitVerifierIdCard;
-
-    /// @notice Mapping from signature type to register circuit verifier addresses for Id Cards.
-    mapping(uint256 => address) internal _sigTypeToRegisterCircuitVerifiersIdCard;
-
-    /// @notice Mapping from signature type to DSC circuit verifier addresses for Id Cards.
-    mapping(uint256 => address) internal _sigTypeToDscCircuitVerifiersIdCard;
-    
+    mapping(bytes32 => address) internal  _attestaionIdToRegistry;
+    mapping(bytes32 => address) internal _attestationIdToDiscloseVerifier;
 }
 
 /**
@@ -85,7 +60,8 @@ abstract contract IdentityVerificationHubStorageV2 is
  * @dev Provides functions for registering commitments and verifying groth16 proofs and inclusion proofs.
  */
 contract IdentityVerificationHubImplV2 is 
-    IdentityVerificationHubStorageV2, 
+    IdentityVerificationHubStorageV2,
+    IdentityVerificationHubImplV1,
     IIdentityVerificationHubV2 
 {
     using Formatter for uint256;
@@ -350,76 +326,6 @@ contract IdentityVerificationHubImplV2 is
     }
 
     /**
-     * @notice Converts packed revealed data into a human-readable format.
-     * @dev Uses Formatter and CircuitAttributeHandler to decode the data.
-     * @param revealedDataPacked An array of three packed uint256 values.
-     * @param types An array of RevealedDataType indicating the types of data expected.
-     * @return A ReadableRevealedData struct containing the decoded data.
-     */
-    function getReadableRevealedData(
-        uint256[3] memory revealedDataPacked,
-        RevealedDataType[] memory types
-    )
-        external
-        virtual
-        onlyProxy
-        view
-        returns (ReadableRevealedData memory)
-    {
-        bytes memory charcodes = Formatter.fieldElementsToBytes(
-            revealedDataPacked
-        );
-
-        ReadableRevealedData memory attrs;
-
-        for (uint256 i = 0; i < types.length; i++) {
-            RevealedDataType dataType = types[i];
-            if (dataType == RevealedDataType.ISSUING_STATE) {
-                attrs.issuingState = CircuitAttributeHandler.getIssuingState(charcodes);
-            } else if (dataType == RevealedDataType.NAME) {
-                attrs.name = CircuitAttributeHandler.getName(charcodes);
-            } else if (dataType == RevealedDataType.PASSPORT_NUMBER) {
-                attrs.passportNumber = CircuitAttributeHandler.getPassportNumber(charcodes);
-            } else if (dataType == RevealedDataType.NATIONALITY) {
-                attrs.nationality = CircuitAttributeHandler.getNationality(charcodes);
-            } else if (dataType == RevealedDataType.DATE_OF_BIRTH) {
-                attrs.dateOfBirth = CircuitAttributeHandler.getDateOfBirth(charcodes);
-            } else if (dataType == RevealedDataType.GENDER) {
-                attrs.gender = CircuitAttributeHandler.getGender(charcodes);
-            } else if (dataType == RevealedDataType.EXPIRY_DATE) {
-                attrs.expiryDate = CircuitAttributeHandler.getExpiryDate(charcodes);
-            } else if (dataType == RevealedDataType.OLDER_THAN) {
-                attrs.olderThan = CircuitAttributeHandler.getOlderThan(charcodes);
-            } else if (dataType == RevealedDataType.PASSPORT_NO_OFAC) {
-                attrs.passportNoOfac = CircuitAttributeHandler.getPassportNoOfac(charcodes);
-            } else if (dataType == RevealedDataType.NAME_AND_DOB_OFAC) {
-                attrs.nameAndDobOfac = CircuitAttributeHandler.getNameAndDobOfac(charcodes);
-            } else if (dataType == RevealedDataType.NAME_AND_YOB_OFAC) {
-                attrs.nameAndYobOfac = CircuitAttributeHandler.getNameAndYobOfac(charcodes);
-            }
-        }
-
-        return attrs;
-    }
-
-    /**
-     * @notice Extracts the forbidden countries list from packed data.
-     * @param forbiddenCountriesListPacked Packed data representing forbidden countries.
-     * @return An array of strings with a maximum length of MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH.
-     */
-    function getReadableForbiddenCountries(
-        uint256[4] memory forbiddenCountriesListPacked
-    )
-        external
-        virtual
-        onlyProxy
-        view
-        returns (string[MAX_FORBIDDEN_COUNTRIES_LIST_LENGTH] memory)
-    {
-        return Formatter.extractForbiddenCountriesFromPacked(forbiddenCountriesListPacked);
-    }
-
-    /**
      * @notice Verifies the VC and Disclose proof.
      * @dev Checks commitment roots, OFAC root, current date range, and other attributes depending on verification configuration.
      * @param proof The VcAndDiscloseHubProof containing the proof data.
@@ -503,7 +409,7 @@ contract IdentityVerificationHubImplV2 is
      * @param registerCircuitVerifierId The identifier for the register circuit verifier to use.
      * @param registerCircuitProof The register circuit proof data.
      */
-    function registerIdCardCommitment(
+    function registerEuIdCardCommitment(
         uint256 registerCircuitVerifierId,
         IRegisterCircuitVerifier.RegisterCircuitProof memory registerCircuitProof
     ) 
@@ -656,14 +562,14 @@ contract IdentityVerificationHubImplV2 is
     }
 
     // ====================================================
-    // External View Functions - Id Card
+    // External View Functions - Eu Id Card
     // ====================================================
 
     /**
-     * @notice Retrieves the Id Card registry address.
-     * @return The address of the Id Card Identity Registry.
+     * @notice Retrieves the Eu Id Card registry address.
+     * @return The address of the Eu Id Card Identity Registry.
      */
-    function registryIdCard() 
+    function registryEuIdCard() 
         external
         view 
         onlyProxy
@@ -673,8 +579,8 @@ contract IdentityVerificationHubImplV2 is
     }
 
     /**
-     * @notice Retrieves the Id Card VC and Disclose circuit verifier address.
-     * @return The address of the Id Card VC and Disclose circuit verifier.
+     * @notice Retrieves the Eu Id Card VC and Disclose circuit verifier address.
+     * @return The address of the Eu Id Card VC and Disclose circuit verifier.
      */
     function vcAndDiscloseCircuitVerifierIdCard() 
         external
