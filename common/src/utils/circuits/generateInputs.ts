@@ -4,6 +4,7 @@ import {
   COMMITMENT_TREE_DEPTH,
   MAX_PADDED_ECONTENT_LEN,
   MAX_PADDED_SIGNED_ATTR_LEN,
+  OFAC_TREE_LEVELS,
   max_csca_bytes,
   max_dsc_bytes,
 } from '../../constants/constants';
