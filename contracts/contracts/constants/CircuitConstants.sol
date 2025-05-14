@@ -8,96 +8,119 @@ pragma solidity 0.8.28;
  * @dev These indices map directly to specific data fields in the corresponding circuits proofs.
  */
 library CircuitConstants {
-    
+
     // ---------------------------
     // Register Circuit Constants
     // ---------------------------
-    
+
     /**
      * @notice Index to access the nullifier in the register circuit public signals.
      */
     uint256 constant REGISTER_NULLIFIER_INDEX = 0;
-    
+
     /**
      * @notice Index to access the commitment in the register circuit public signals.
      */
     uint256 constant REGISTER_COMMITMENT_INDEX = 1;
-    
+
     /**
      * @notice Index to access the Merkle root in the register circuit public signals.
      */
     uint256 constant REGISTER_MERKLE_ROOT_INDEX = 2;
-    
+
     // ---------------------------
     // DSC Circuit Constants
     // ---------------------------
-    
+
     /**
      * @notice Index to access the tree leaf in the DSC circuit public signals.
      */
     uint256 constant DSC_TREE_LEAF_INDEX = 0;
-    
+
     /**
      * @notice Index to access the CSCA root in the DSC circuit public signals.
      */
     uint256 constant DSC_CSCA_ROOT_INDEX = 1;
-    
+
     // -------------------------------------
     // VC and Disclose Circuit Constants
     // -------------------------------------
-    
+
     /**
      * @notice Index to access the packed revealed data in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_REVEALED_DATA_PACKED_INDEX = 0;
-    
+    uint256 constant PASSPORT_REVEALED_DATA_PACKED_INDEX = 0;
+
     /**
      * @notice Index to access the forbidden countries list (packed) in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_FORBIDDEN_COUNTRIES_LIST_PACKED_INDEX = 3;
-    
+    uint256 constant PASSPORT_FORBIDDEN_COUNTRIES_LIST_PACKED_INDEX = 3;
+
     /**
      * @notice Index to access the nullifier in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_NULLIFIER_INDEX = 7;
-    
+    uint256 constant PASSPORT_NULLIFIER_INDEX = 7;
+
     /**
      * @notice Index to access the attestation ID in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_ATTESTATION_ID_INDEX = 8;
-    
+    uint256 constant PASSPORT_ATTESTATION_ID_INDEX = 8;
+
     /**
      * @notice Index to access the Merkle root in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_MERKLE_ROOT_INDEX = 9;
-    
+    uint256 constant PASSPORT_MERKLE_ROOT_INDEX = 9;
+
     /**
      * @notice Index to access the current date in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_CURRENT_DATE_INDEX = 10;
-    
+    uint256 constant PASSPORT_CURRENT_DATE_INDEX = 10;
+
     /**
      * @notice Index to access the passport number SMT root in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_PASSPORT_NO_SMT_ROOT_INDEX = 16;
+    uint256 constant PASSPORT_PASSPORT_NO_SMT_ROOT_INDEX = 16;
 
     /**
      * @notice Index to access the name and date of birth SMT root in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_NAME_DOB_SMT_ROOT_INDEX = 17;
+    uint256 constant PASSPORT_NAME_DOB_SMT_ROOT_INDEX = 17;
 
     /**
      * @notice Index to access the name and year of birth SMT root in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_NAME_YOB_SMT_ROOT_INDEX = 18;
+    uint256 constant PASSPORT_NAME_YOB_SMT_ROOT_INDEX = 18;
 
     /**
      * @notice Index to access the scope in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_SCOPE_INDEX = 19;
+    uint256 constant PASSPORT_SCOPE_INDEX = 19;
 
     /**
      * @notice Index to access the user identifier in the VC and Disclose circuit public signals.
      */
-    uint256 constant VC_AND_DISCLOSE_USER_IDENTIFIER_INDEX = 20;
+    uint256 constant PASSPORT_USER_IDENTIFIER_INDEX = 20;
+
+    // From here, shows index of id card
+
+    uint256 constant ID_CARD_REVEALED_DATA_PACKED_INDEX = 0;
+
+    uint256 constant ID_CARD_FORBIDDEN_COUNTRIES_LIST_PACKED_INDEX = 4;
+
+    uint256 constant ID_CARD_NULLIFIER_INDEX = 8;
+
+    uint256 constant ID_CARD_ATTESTATION_ID_INDEX = 9;
+
+    uint256 constant ID_CARD_MERKLE_ROOT_INDEX = 10;
+
+    uint256 constant ID_CARD_CURRENT_DATE_INDEX = 11;
+
+    uint256 constant ID_CARD_NAME_DOB_SMT_ROOT_INDEX = 17;
+
+    uint256 constant ID_CARD_NAME_YOB_SMT_ROOT_INDEX = 18;
+
+    uint256 constant ID_CARD_SCOPE_INDEX = 19;
+
+    uint256 constant ID_CARD_USER_IDENTIFIER_INDEX = 20;
+
 }
