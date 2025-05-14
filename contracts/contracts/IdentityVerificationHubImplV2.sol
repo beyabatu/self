@@ -13,7 +13,7 @@ import {IRegisterCircuitVerifier} from "./interfaces/IRegisterCircuitVerifier.so
 import {IVcAndDiscloseCircuitVerifier} from "./interfaces/IVcAndDiscloseCircuitVerifier.sol";
 import {IDscCircuitVerifier} from "./interfaces/IDscCircuitVerifier.sol";
 import {ImplRoot} from "./upgradeable/ImplRoot.sol";
-import {IdentityVerificationHubStorageV1, IdentityVerificationHubImplV1} from "IdentityVerificationHubImplV1.sol"; 
+import {IdentityVerificationHubStorageV1} from "./IdentityVerificationHubImplV1.sol"; 
 import {IIdentityRegistryIdCardV1} from "./interfaces/IIdentityRegistryIdCardV1.sol";
 
 /**
@@ -61,7 +61,6 @@ abstract contract IdentityVerificationHubStorageV2 is
  */
 contract IdentityVerificationHubImplV2 is 
     IdentityVerificationHubStorageV2,
-    IdentityVerificationHubImplV1,
     IIdentityVerificationHubV2 
 {
     using Formatter for uint256;
@@ -72,39 +71,25 @@ contract IdentityVerificationHubImplV2 is
     // Events
     // ====================================================
 
-    /**
-     * @notice Emitted when the hub is initialized.
-     * @param registry The address of the registry.
-     * @param vcAndDiscloseCircuitVerifier The address of the VC and Disclose circuit verifier.
-     * @param registerCircuitVerifierIds Array of register circuit verifier ids.
-     * @param registerCircuitVerifiers Array of register circuit verifier addresses.
-     * @param dscCircuitVerifierIds Array of DSC circuit verifier ids.
-     * @param dscCircuitVerifiers Array of DSC circuit verifier addresses.
-     */
     event HubInitialized(
-        address registry, 
-        address vcAndDiscloseCircuitVerifier,
+        bytes32[] attestationIds,
+        address[] registryAddresses, 
+        address[] vcAndDiscloseCircuitVerifiers,
         uint256[] registerCircuitVerifierIds,
         address[] registerCircuitVerifiers,
         uint256[] dscCircuitVerifierIds,
-        address[] dscCircuitVerifiers,
-        address registryIdCard,
-        address vcAndDiscloseCircuitVerifierIdCard,
-        uint256[] registerCircuitVerifierIdsIdCard,
-        address[] registerCircuitVerifiersIdCard,
-        uint256[] dscCircuitVerifierIdsIdCard,
-        address[] dscCircuitVerifiersIdCard
+        address[] dscCircuitVerifiers
     );
     /**
      * @notice Emitted when the registry address is updated.
      * @param registry The new registry address.
      */
-    event RegistryUpdated(address registry);
+    event RegistryUpdated(bytes32 attestationId, address registry);
     /**
      * @notice Emitted when the VC and Disclose circuit verifier is updated.
      * @param vcAndDiscloseCircuitVerifier The new VC and Disclose circuit verifier address.
      */
-    event VcAndDiscloseCircuitUpdated(address vcAndDiscloseCircuitVerifier);
+    event VcAndDiscloseCircuitUpdated(bytes32 attestationId, address vcAndDiscloseCircuitVerifier);
     /**
      * @notice Emitted when a register circuit verifier is updated.
      * @param typeId The signature type id.
@@ -190,38 +175,31 @@ contract IdentityVerificationHubImplV2 is
     // Initializer
     // ====================================================
 
-    /**
-     * @notice Initializes the hub implementation.
-     * @dev Sets the registry, VC and Disclose circuit verifier address, register circuit verifiers, and DSC circuit verifiers.
-     * @param registryAddress The address of the Identity Registry.
-     * @param vcAndDiscloseCircuitVerifierAddress The address of the VC and Disclose circuit verifier.
-     * @param registerCircuitVerifierIds Array of ids for register circuit verifiers.
-     * @param registerCircuitVerifierAddresses Array of addresses for register circuit verifiers.
-     * @param dscCircuitVerifierIds Array of ids for DSC circuit verifiers.
-     * @param dscCircuitVerifierAddresses Array of addresses for DSC circuit verifiers.
-     */
     function initialize(
-        address registryAddress,
-        address vcAndDiscloseCircuitVerifierAddress,
+        bytes32[] memory attestationIds,
+        address[] memory registryAddresses,
+        address[] memory vcAndDiscloseCircuitVerifierAddresses,
         uint256[] memory registerCircuitVerifierIds,
         address[] memory registerCircuitVerifierAddresses,
         uint256[] memory dscCircuitVerifierIds,
-        address[] memory dscCircuitVerifierAddresses,
-        address registryIdCardAddress,
-        address vcAndDiscloseCircuitVerifierIdCardAddress,
-        uint256[] memory registerCircuitVerifierIdsIdCard,
-        address[] memory registerCircuitVerifiersIdCardAddresses,
-        uint256[] memory dscCircuitVerifierIdsIdCard,
-        address[] memory dscCircuitVerifiersIdCardAddresses
+        address[] memory dscCircuitVerifierAddresses
     ) external initializer {
         __ImplRoot_init();
-        _registry = registryAddress;
-        _vcAndDiscloseCircuitVerifier = vcAndDiscloseCircuitVerifierAddress;
+        if (attestationIds.length != registryAddresses.length) {
+            revert LENGTH_MISMATCH();
+        }
+        if (attestationIds.length != vcAndDiscloseCircuitVerifierAddresses.length) {
+            revert LENGTH_MISMATCH();
+        }
         if (registerCircuitVerifierIds.length != registerCircuitVerifierAddresses.length) {
             revert LENGTH_MISMATCH();
         }
         if (dscCircuitVerifierIds.length != dscCircuitVerifierAddresses.length) {
             revert LENGTH_MISMATCH();
+        }
+        for (uint256 i = 0; i < attestationIds.length; i++) {
+            _attestaionIdToRegistry[attestationIds[i]] = registryAddresses[i];
+            _attestationIdToDiscloseVerifier[attestationIds[i]] = vcAndDiscloseCircuitVerifierAddresses[i];
         }
         for (uint256 i = 0; i < registerCircuitVerifierIds.length; i++) {
             _sigTypeToRegisterCircuitVerifiers[registerCircuitVerifierIds[i]] = registerCircuitVerifierAddresses[i];
@@ -229,33 +207,14 @@ contract IdentityVerificationHubImplV2 is
         for (uint256 i = 0; i < dscCircuitVerifierIds.length; i++) {
             _sigTypeToDscCircuitVerifiers[dscCircuitVerifierIds[i]] = dscCircuitVerifierAddresses[i];
         }
-        _registryIdCard = registryIdCardAddress;
-        _vcAndDiscloseCircuitVerifierIdCard = vcAndDiscloseCircuitVerifierIdCardAddress;
-        if (registerCircuitVerifierIdsIdCard.length != registerCircuitVerifiersIdCardAddresses.length) {
-            revert LENGTH_MISMATCH();
-        }
-        if (dscCircuitVerifierIdsIdCard.length != dscCircuitVerifiersIdCardAddresses.length) {
-            revert LENGTH_MISMATCH();
-        }
-        for (uint256 i = 0; i < registerCircuitVerifierIdsIdCard.length; i++) {
-            _sigTypeToRegisterCircuitVerifiersIdCard[registerCircuitVerifierIdsIdCard[i]] = registerCircuitVerifiersIdCardAddresses[i];
-        }
-        for (uint256 i = 0; i < dscCircuitVerifierIdsIdCard.length; i++) {
-            _sigTypeToDscCircuitVerifiersIdCard[dscCircuitVerifierIdsIdCard[i]] = dscCircuitVerifiersIdCardAddresses[i];
-        }
         emit HubInitialized(
-            registryAddress, 
-            vcAndDiscloseCircuitVerifierAddress,
+            attestationIds,
+            registryAddresses, 
+            vcAndDiscloseCircuitVerifierAddresses,
             registerCircuitVerifierIds,
             registerCircuitVerifierAddresses,
             dscCircuitVerifierIds,
-            dscCircuitVerifierAddresses,
-            registryIdCardAddress,
-            vcAndDiscloseCircuitVerifierIdCardAddress,
-            registerCircuitVerifierIdsIdCard,
-            registerCircuitVerifiersIdCardAddresses,
-            dscCircuitVerifierIdsIdCard,
-            dscCircuitVerifiersIdCardAddresses
+            dscCircuitVerifierAddresses
         );
     }
 
@@ -267,28 +226,32 @@ contract IdentityVerificationHubImplV2 is
      * @notice Retrieves the registry address.
      * @return The address of the Identity Registry.
      */
-    function registry() 
+    function registry(
+        bytes32 attestationId
+    ) 
         external
         virtual
         onlyProxy
         view 
         returns (address) 
     {
-        return _registry;
+        return _attestaionIdToRegistry[attestationId];
     }
 
     /**
      * @notice Retrieves the VC and Disclose circuit verifier address.
      * @return The address of the VC and Disclose circuit verifier.
      */
-    function vcAndDiscloseCircuitVerifier() 
+    function vcAndDiscloseCircuitVerifier(
+        bytes32 attestationId
+    ) 
         external
         virtual
         onlyProxy
         view 
         returns (address) 
     {
-        return _vcAndDiscloseCircuitVerifier;
+        return _attestationIdToDiscloseVerifier[attestationId];
     }
 
     /**
@@ -403,46 +366,6 @@ contract IdentityVerificationHubImplV2 is
         );
     }
 
-    /**
-     * @notice Registers an Id Card commitment using a register circuit proof.
-     * @dev Verifies the proof and then calls the Id Card Identity Registry to register the commitment.
-     * @param registerCircuitVerifierId The identifier for the register circuit verifier to use.
-     * @param registerCircuitProof The register circuit proof data.
-     */
-    function registerEuIdCardCommitment(
-        uint256 registerCircuitVerifierId,
-        IRegisterCircuitVerifier.RegisterCircuitProof memory registerCircuitProof
-    ) 
-        external
-        onlyProxy
-    {
-        _verifyIdCardRegisterProof(registerCircuitVerifierId, registerCircuitProof);
-        IIdentityRegistryIdCardV1(_registryIdCard).registerCommitment(
-            AttestationId.ID_CARD,
-            registerCircuitProof.pubSignals[CircuitConstants.REGISTER_NULLIFIER_INDEX],
-            registerCircuitProof.pubSignals[CircuitConstants.REGISTER_COMMITMENT_INDEX]
-        );
-    }
-
-    /**
-     * @notice Registers an Id Card DSC key commitment using a DSC circuit proof.
-     * @dev Verifies the DSC proof and then calls the Id Card Identity Registry to register the dsc key commitment.
-     * @param dscCircuitVerifierId The identifier for the DSC circuit verifier to use.
-     * @param dscCircuitProof The DSC circuit proof data.
-     */
-    function registerIdCardDscKeyCommitment(
-        uint256 dscCircuitVerifierId,
-        IDscCircuitVerifier.DscCircuitProof memory dscCircuitProof
-    )
-        external
-        onlyProxy
-    {
-        _verifyIdCardDscProof(dscCircuitVerifierId, dscCircuitProof);
-        IIdentityRegistryIdCardV1(_registryIdCard).registerDscKeyCommitment(
-            dscCircuitProof.pubSignals[CircuitConstants.DSC_TREE_LEAF_INDEX]
-        );
-    }
-
     // ====================================================
     // External Functions - Only Owner
     // ====================================================
@@ -452,6 +375,7 @@ contract IdentityVerificationHubImplV2 is
      * @param registryAddress The new registry address.
      */
     function updateRegistry(
+        bytes32 attestationId,
         address registryAddress
     ) 
         external 
@@ -459,8 +383,8 @@ contract IdentityVerificationHubImplV2 is
         onlyProxy
         onlyOwner 
     {
-        _registry = registryAddress;
-        emit RegistryUpdated(registryAddress);
+        _attestaionIdToRegistry[attestationId] = registryAddress;
+        emit RegistryUpdated(attestationId, registryAddress);
     }
 
     /**
@@ -468,6 +392,7 @@ contract IdentityVerificationHubImplV2 is
      * @param vcAndDiscloseCircuitVerifierAddress The new VC and Disclose circuit verifier address.
      */
     function updateVcAndDiscloseCircuit(
+        bytes32 attestationId,
         address vcAndDiscloseCircuitVerifierAddress
     ) 
         external 
@@ -475,8 +400,8 @@ contract IdentityVerificationHubImplV2 is
         onlyProxy
         onlyOwner 
     {
-        _vcAndDiscloseCircuitVerifier = vcAndDiscloseCircuitVerifierAddress;
-        emit VcAndDiscloseCircuitUpdated(vcAndDiscloseCircuitVerifierAddress);
+        _attestationIdToDiscloseVerifier[attestationId] = vcAndDiscloseCircuitVerifierAddress;
+        emit VcAndDiscloseCircuitUpdated(attestationId, vcAndDiscloseCircuitVerifierAddress);
     }
 
     /**
@@ -559,68 +484,6 @@ contract IdentityVerificationHubImplV2 is
             _sigTypeToDscCircuitVerifiers[typeIds[i]] = verifierAddresses[i];
             emit DscCircuitVerifierUpdated(typeIds[i], verifierAddresses[i]);
         }
-    }
-
-    // ====================================================
-    // External View Functions - Eu Id Card
-    // ====================================================
-
-    /**
-     * @notice Retrieves the Eu Id Card registry address.
-     * @return The address of the Eu Id Card Identity Registry.
-     */
-    function registryEuIdCard() 
-        external
-        view 
-        onlyProxy
-        returns (address) 
-    {
-        return _registryIdCard;
-    }
-
-    /**
-     * @notice Retrieves the Eu Id Card VC and Disclose circuit verifier address.
-     * @return The address of the Eu Id Card VC and Disclose circuit verifier.
-     */
-    function vcAndDiscloseCircuitVerifierIdCard() 
-        external
-        view 
-        onlyProxy
-        returns (address) 
-    {
-        return _vcAndDiscloseCircuitVerifierIdCard;
-    }
-
-    /**
-     * @notice Retrieves the Id Card register circuit verifier address for a given signature type.
-     * @param typeId The signature type identifier.
-     * @return The Id Card register circuit verifier address.
-     */
-    function sigTypeToRegisterCircuitVerifiersIdCard(
-        uint256 typeId
-    ) 
-        external
-        view 
-        onlyProxy
-        returns (address) 
-    {
-        return _sigTypeToRegisterCircuitVerifiersIdCard[typeId];
-    }
-
-    /**
-     * @notice Retrieves the Id Card DSC circuit verifier address for a given signature type.
-     * @param typeId The signature type identifier.
-     * @return The Id Card DSC circuit verifier address.
-     */
-    function sigTypeToDscCircuitVerifiersIdCard(
-        uint256 typeId
-    ) 
-        external
-        view 
-        onlyProxy
-        returns (address) 
-    {
-        return _sigTypeToDscCircuitVerifiersIdCard[typeId];
     }
 
     // ====================================================
@@ -755,70 +618,6 @@ contract IdentityVerificationHubImplV2 is
         }
 
         if (!IIdentityRegistryV1(_registry).checkCscaRoot(dscCircuitProof.pubSignals[CircuitConstants.DSC_CSCA_ROOT_INDEX])) {
-            revert INVALID_CSCA_ROOT();
-        }
-
-        if(!IDscCircuitVerifier(verifier).verifyProof(
-            dscCircuitProof.a,
-            dscCircuitProof.b,
-            dscCircuitProof.c,
-            dscCircuitProof.pubSignals
-        )) {
-            revert INVALID_DSC_PROOF();
-        }
-    }
-
-    /**
-     * @notice Verifies the Id Card register circuit proof.
-     * @dev Uses the register circuit verifier specified by registerCircuitVerifierId for Id Cards.
-     * @param registerCircuitVerifierId The identifier for the register circuit verifier.
-     * @param registerCircuitProof The register circuit proof data.
-     */
-    function _verifyIdCardRegisterProof(
-        uint256 registerCircuitVerifierId,
-        IRegisterCircuitVerifier.RegisterCircuitProof memory registerCircuitProof
-    ) 
-        internal
-        view
-    {
-        address verifier = _sigTypeToRegisterCircuitVerifiersIdCard[registerCircuitVerifierId];
-        if (verifier == address(0)) {
-            revert NO_VERIFIER_SET();
-        }
-
-        if (!IIdentityRegistryIdCardV1(_registryIdCard).checkDscKeyCommitmentMerkleRoot(registerCircuitProof.pubSignals[CircuitConstants.REGISTER_MERKLE_ROOT_INDEX])) {
-            revert INVALID_COMMITMENT_ROOT();
-        }
-
-        if(!IRegisterCircuitVerifier(verifier).verifyProof(
-            registerCircuitProof.a,
-            registerCircuitProof.b,
-            registerCircuitProof.c,
-            registerCircuitProof.pubSignals
-        )) {
-            revert INVALID_REGISTER_PROOF();
-        }
-    }
-
-    /**
-     * @notice Verifies the Id Card DSC circuit proof.
-     * @dev Uses the DSC circuit verifier specified by dscCircuitVerifierId for Id Cards.
-     * @param dscCircuitVerifierId The identifier for the DSC circuit verifier.
-     * @param dscCircuitProof The DSC circuit proof data.
-     */
-    function _verifyIdCardDscProof(
-        uint256 dscCircuitVerifierId,
-        IDscCircuitVerifier.DscCircuitProof memory dscCircuitProof
-    ) 
-        internal
-        view
-    {
-        address verifier = _sigTypeToDscCircuitVerifiersIdCard[dscCircuitVerifierId];
-        if (verifier == address(0)) {
-            revert NO_VERIFIER_SET();
-        }
-
-        if (!IIdentityRegistryIdCardV1(_registryIdCard).checkCscaRoot(dscCircuitProof.pubSignals[CircuitConstants.DSC_CSCA_ROOT_INDEX])) {
             revert INVALID_CSCA_ROOT();
         }
 
