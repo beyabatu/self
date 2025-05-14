@@ -50,6 +50,16 @@ interface IIdentityVerificationHubV2 {
         uint256[4] forbiddenCountriesListPacked;
     }
 
+    struct IdCardVcAndDiscloseVerificationResult {
+        uint256 attestationId;
+        uint256 scope;
+        uint256 userIdentifier;
+        uint256 nullifier;
+        uint256 identityCommitmentRoot;
+        uint256[4] revealedDataPacked;
+        uint256[4] forbiddenCountriesListPacked;
+    }
+
     /**
      * @notice Structure representing a hub proof for VC and Disclose verification.
      * @param olderThanEnabled Flag indicating if the 'olderThan' check is required.
@@ -65,6 +75,15 @@ interface IIdentityVerificationHubV2 {
         bool forbiddenCountriesEnabled;
         uint256[4] forbiddenCountriesListPacked;
         bool[3] ofacEnabled;
+        IVcAndDiscloseCircuitVerifier.VcAndDiscloseProof vcAndDiscloseProof;
+    }
+
+    struct IdCardVcAndDiscloseHubProof {
+        bool olderThanEnabled;
+        uint256 olderThan;
+        bool forbiddenCountriesEnabled;
+        uint256[4] forbiddenCountriesListPacked;
+        bool[2] ofacEnabled;
         IVcAndDiscloseCircuitVerifier.VcAndDiscloseProof vcAndDiscloseProof;
     }
 
@@ -143,4 +162,4 @@ interface IIdentityVerificationHubV2 {
         view
         returns (address verifier);
 
-} 
+}
