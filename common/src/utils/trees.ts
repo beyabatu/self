@@ -3,7 +3,7 @@ import { LeanIMT } from '@openpassport/zk-kit-lean-imt';
 import { ChildNodes, SMT } from '@openpassport/zk-kit-smt';
 import countries from "i18n-iso-countries";
 import en from "i18n-iso-countries/langs/en.json";
-import { poseidon12, poseidon13, poseidon2, poseidon3, poseidon6 } from 'poseidon-lite';
+import { poseidon10, poseidon12, poseidon13, poseidon2, poseidon3, poseidon6 } from 'poseidon-lite';
 import { CSCA_TREE_DEPTH, DSC_TREE_DEPTH, max_csca_bytes, max_dsc_bytes, OFAC_TREE_LEVELS } from '../constants/constants';
 import {
   CertificateData,
