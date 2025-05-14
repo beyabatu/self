@@ -42,7 +42,7 @@ function genDG1IdCard(idDocInput: IdDocInput) {
     const nationality = formatDG1Attribute(nationality_index, idDocInput.nationality);
     const optional_data_2 = formatDG1Attribute(optional_data_2_index, '');
     const overall_check_digit = formatDG1Attribute(overall_check_digit_index, '1');
-    const name = formatDG1Attribute(name_index, formatName(idDocInput.firstName, idDocInput.lastName));
+    const name = formatDG1Attribute(name_index, formatName(idDocInput.firstName, idDocInput.lastName, idDocInput.idType));
 
     const dg1 = `${doc_type}${issuing_state}${document_number}${document_number_check_digit}${optional_data}${date_of_birth}${date_of_birth_check_digit}${sex}${expiration_date}${expiration_date_check_digit}${nationality}${optional_data_2}${overall_check_digit}${name}`;
     if (dg1.length !== 90) {
