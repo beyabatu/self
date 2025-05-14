@@ -130,7 +130,7 @@ export function formatDg2Hash(dg2Hash: number[]) {
 export function formatDG1Attribute(index: number[], value: string) {
     const max_length = index[1] - index[0] + 1;
     if (value.length > max_length) {
-        throw new Error(`Value is too long for index ${index[0]}-${index[1]}`);
+        throw new Error(`Value is too long for index ${index[0]}-${index[1]}, value: ${value}, max_length: ${max_length}`);
     }
     return value.padEnd(max_length, '<');
 }
