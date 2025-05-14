@@ -4,7 +4,8 @@ import path from 'path';
 import { wasm as wasm_tester } from 'circom_tester';
 import {
     attributeToPosition_ID,
-    ID_CARD_ATTESTATION_ID
+    ID_CARD_ATTESTATION_ID,
+    OFAC_TREE_LEVELS
 } from '../../../common/src/constants/constants';
 import { poseidon1, poseidon2 } from 'poseidon-lite';
 import { LeanIMT } from '@openpassport/zk-kit-lean-imt';
