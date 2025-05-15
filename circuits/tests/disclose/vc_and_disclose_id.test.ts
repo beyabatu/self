@@ -170,6 +170,7 @@ describe('Disclose', function () {
         const revealedData_packed = await circuit.getOutput(w, ['revealedData_packed[4]']);
 
         const reveal_unpacked = formatAndUnpackReveal(revealedData_packed, 'id');
+        console.log("")
         const older_than = getAttributeFromUnpackedReveal(reveal_unpacked, 'older_than', 'id');
         expect(older_than).to.equal('18');
     });
@@ -258,7 +259,6 @@ describe('Disclose', function () {
             for (const testCase of testCases) {
                 console.log(`Testing: ${testCase.desc}`);
                 const passportData = testCase.data;
-                console.log("passportData: ", passportData);
                 const sanctionedCommitment = generateCommitment(
                     secret,
                     ID_CARD_ATTESTATION_ID,
