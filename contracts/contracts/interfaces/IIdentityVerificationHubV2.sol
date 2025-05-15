@@ -100,17 +100,6 @@ interface IIdentityVerificationHubV2 {
         view
         returns (VcAndDiscloseVerificationResult memory result);
 
-    /**
-     * @notice Registers a passport commitment using a register circuit proof.
-     * @dev Verifies the register circuit proof before registering the passport commitment.
-     * @param registerCircuitVerifierId The identifier for the register circuit verifier to be used.
-     * @param registerCircuitProof The proof data for the register circuit.
-     */
-    function registerPassportCommitment(
-        uint256 registerCircuitVerifierId,
-        IRegisterCircuitVerifier.RegisterCircuitProof memory registerCircuitProof
-    )
-        external;
 
     /**
      * @notice Registers a DSC key commitment using a DSC circuit proof.
@@ -119,6 +108,7 @@ interface IIdentityVerificationHubV2 {
      * @param dscCircuitProof The proof data for the DSC circuit.
      */
     function registerDscKeyCommitment(
+        bytes32 attestationId,
         uint256 dscCircuitVerifierId,
         IDscCircuitVerifier.DscCircuitProof memory dscCircuitProof
     )

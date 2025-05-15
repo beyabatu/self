@@ -133,6 +133,31 @@ library Formatter {
         return bytesArray;
     }
 
+    function fieldElementsToBytesIdCard(
+        uint256[4] memory publicSignals
+    ) internal pure returns (bytes memory) {
+        if (
+            publicSignals[0] >= SNARK_SCALAR_FIELD ||
+            publicSignals[1] >= SNARK_SCALAR_FIELD ||
+            publicSignals[2] >= SNARK_SCALAR_FIELD ||
+            publicSignals[3] >= SNARK_SCALAR_FIELD
+        ) {
+            revert InvalidFieldElement();
+        }
+        uint8[4] memory bytesCount = [31, 31, 31, 1];
+        bytes memory bytesArray = new bytes(94);
+
+        uint256 index = 0;
+        for (uint256 i = 0; i < 4; i++) {
+            uint256 element = publicSignals[i];
+            for (uint8 j = 0; j < bytesCount[i]; j++) {
+                bytesArray[index++] = bytes1(uint8(element & 0xff));
+                element = element >> 8;
+            }
+        }
+        return bytesArray;
+    }
+
     /**
      * @notice Extracts forbidden country codes from a packed uint256.
      * @dev Each forbidden country is represented by 3 bytes in the packed data.
@@ -192,8 +217,8 @@ library Formatter {
 
     /**
      * @notice Converts an array of 6 numerical values representing a date into a Unix timestamp.
-     * @dev Each element in the dateNum array is taken modulo 10, converted to its ASCII digit, 
-     *      and concatenated to form a date string in YYMMDD format. This string is then converted 
+     * @dev Each element in the dateNum array is taken modulo 10, converted to its ASCII digit,
+     *      and concatenated to form a date string in YYMMDD format. This string is then converted
      *      into a Unix timestamp using dateToUnixTimestamp.
      * @param dateNum An array of 6 unsigned integers representing a date in YYMMDD format.
      * @return timestamp The Unix timestamp corresponding to the provided date.

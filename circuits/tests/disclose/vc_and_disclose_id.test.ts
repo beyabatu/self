@@ -258,6 +258,7 @@ describe('Disclose', function () {
             for (const testCase of testCases) {
                 console.log(`Testing: ${testCase.desc}`);
                 const passportData = testCase.data;
+                console.log("passportData: ", passportData);
                 const sanctionedCommitment = generateCommitment(
                     secret,
                     ID_CARD_ATTESTATION_ID,
