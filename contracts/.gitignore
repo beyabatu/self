@@ -22,6 +22,16 @@ ignition/deployments/prod/artifacts/*
 ignition/deployments/prod/artifacts/**/dbg.json
 ignition/deployments/prod/artifacts/dbg.json
 
+!ignition/deployments/staging
+ignition/deployments/staging/*
+!ignition/deployments/staging/deployed_addresses.json
+!ignition/deployments/staging/artifacts
+ignition/deployments/staging/artifacts/*
+!ignition/deployments/staging/artifacts/*.json
+!ignition/deployments/staging/artifacts/**/*.json
+ignition/deployments/staging/artifacts/**/dbg.json
+ignition/deployments/staging/artifacts/dbg.json
+
 #Local verifier
 contracts/verifiers/local/*
 

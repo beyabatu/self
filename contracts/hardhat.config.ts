@@ -74,6 +74,7 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY as string,
       ethereum: process.env.ETHERSCAN_API_KEY as string,
       celo: process.env.CELOSCAN_API_KEY as string,
+      celoAlfajores: process.env.CELOSCAN_API_KEY as string
     },
     customChains: [
       {
@@ -82,6 +83,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://api.celoscan.io/api",
           browserURL: "https://celoscan.io"
+        }
+      },
+      {
+        network: "celoAlfajores",
+        chainId: 44787,
+        urls: {
+          apiURL: "https://api-alfajores.celoscan.io/api",
+          browserURL: "https://alfajores.celoscan.io/"
         }
       }
     ]
