@@ -100,10 +100,37 @@ interface IIdentityVerificationHubV2 {
         view
         returns (VcAndDiscloseVerificationResult memory result);
 
+    /**
+     * @notice Verifies a EU ID Card VC and Disclose proof.
+     * @dev Checks the provided proof against verification configuration and returns key result data.
+     * @param proof The hub proof containing configuration flags and the underlying VC and Disclose proof.
+     * @return result The verification result including attestationId, scope, userIdentifier, nullifier, identityCommitmentRoot, revealed data, and forbidden countries list.
+     */
+    function verifyEuIdVcAndDisclose(
+        IdCardVcAndDiscloseHubProof memory proof
+    )
+        external
+        view
+        returns (IdCardVcAndDiscloseVerificationResult memory result);
+
+    /**
+     * @notice Registers a passport commitment using a register circuit proof.
+     * @dev Verifies the proof and then calls the Identity Registry to register the commitment.
+     * @param attestationId The attestation identifier.
+     * @param registerCircuitVerifierId The identifier for the register circuit verifier to use.
+     * @param registerCircuitProof The register circuit proof data.
+     */
+    function registerCommitment(
+        bytes32 attestationId,
+        uint256 registerCircuitVerifierId,
+        IRegisterCircuitVerifier.RegisterCircuitProof memory registerCircuitProof
+    )
+        external;
 
     /**
      * @notice Registers a DSC key commitment using a DSC circuit proof.
      * @dev Verifies the DSC circuit proof before registering the DSC key commitment.
+     * @param attestationId The attestation identifier.
      * @param dscCircuitVerifierId The identifier for the DSC circuit verifier to be used.
      * @param dscCircuitProof The proof data for the DSC circuit.
      */
@@ -152,4 +179,69 @@ interface IIdentityVerificationHubV2 {
         view
         returns (address verifier);
 
+    /**
+     * @notice Updates the registry address.
+     * @param attestationId The attestation identifier.
+     * @param registryAddress The new registry address.
+     */
+    function updateRegistry(
+        bytes32 attestationId,
+        address registryAddress
+    )
+        external;
+
+    /**
+     * @notice Updates the VC and Disclose circuit verifier address.
+     * @param attestationId The attestation identifier.
+     * @param vcAndDiscloseCircuitVerifierAddress The new VC and Disclose circuit verifier address.
+     */
+    function updateVcAndDiscloseCircuit(
+        bytes32 attestationId,
+        address vcAndDiscloseCircuitVerifierAddress
+    )
+        external;
+
+    /**
+     * @notice Updates the register circuit verifier for a specific signature type.
+     * @param typeId The signature type identifier.
+     * @param verifierAddress The new register circuit verifier address.
+     */
+    function updateRegisterCircuitVerifier(
+        uint256 typeId,
+        address verifierAddress
+    )
+        external;
+
+    /**
+     * @notice Updates the DSC circuit verifier for a specific signature type.
+     * @param typeId The signature type identifier.
+     * @param verifierAddress The new DSC circuit verifier address.
+     */
+    function updateDscVerifier(
+        uint256 typeId,
+        address verifierAddress
+    )
+        external;
+
+    /**
+     * @notice Batch updates register circuit verifiers.
+     * @param typeIds An array of signature type identifiers.
+     * @param verifierAddresses An array of new register circuit verifier addresses.
+     */
+    function batchUpdateRegisterCircuitVerifiers(
+        uint256[] calldata typeIds,
+        address[] calldata verifierAddresses
+    )
+        external;
+
+    /**
+     * @notice Batch updates DSC circuit verifiers.
+     * @param typeIds An array of signature type identifiers.
+     * @param verifierAddresses An array of new DSC circuit verifier addresses.
+     */
+    function batchUpdateDscCircuitVerifiers(
+        uint256[] calldata typeIds,
+        address[] calldata verifierAddresses
+    )
+        external;
 }

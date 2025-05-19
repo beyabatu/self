@@ -51,5 +51,11 @@
   "DeployHub#IdentityVerificationHub": "0x3e2487a250e2A7b56c7ef5307Fb591Cc8C83623D",
   "UpdateRegistryCscaRoot#IdentityRegistryImplV1": "0xD961B67B35739cCF16326B087C9aD2c0095cCc4E",
   "UpdateRegistryHub#IdentityRegistryImplV1": "0xD961B67B35739cCF16326B087C9aD2c0095cCc4E",
-  "UpdateRegistryOfacRoot#IdentityRegistryImplV1": "0xD961B67B35739cCF16326B087C9aD2c0095cCc4E"
+  "UpdateRegistryOfacRoot#IdentityRegistryImplV1": "0xD961B67B35739cCF16326B087C9aD2c0095cCc4E",
+  "DeployIdCardRegistryModule#PoseidonT3": "0x272956144fc77b6dFb7161230426a1823339E147",
+  "DeployIdCardRegistryModule#IdentityRegistryIdCardImplV1": "0xd89728C1211a8f239dA74B48d562c464Ee0B31fa",
+  "DeployIdCardRegistryModule#IdentityRegistryIdCard": "0xF77Be82318F11392Efb5F1062D954911d6086537",
+  "DeployV2#IdentityVerificationHubImplV2": "0xfe024f5C7058C06B2b71A21Ca7FB2147f8B453A4",
+  "DeployV2#IdentityVerificationHub": "0xbaB9B3c376e84FEB4aFD9423e3aB278B47d34a0a",
+  "DeployIdCardVerifier#Verifier_register_id_sha256_sha256_sha256_rsa_65537_4096": "0xFe66C9cC9c2929D88842638BD7B3cA9d56887C85"
 }
